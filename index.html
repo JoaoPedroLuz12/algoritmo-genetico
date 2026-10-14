@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Algoritmo Genético — Projetos do Campus</title>
+  <meta name="description" content="Simulador de algoritmo genético para selecionar projetos de melhoria do campus com orçamento limitado.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-text">
+      <h1>Simulador de Algoritmo Genético</h1>
+      <p>Seleção de projetos de melhoria do campus com orçamento limitado · UFPI · Inteligência Artificial 2026.2</p>
+    </div>
+    <!-- Link para o repositório público -->
+    <a id="repo-link" class="repo-link" href="https://github.com/JoaoPedroLuz12/algoritmo-genetico" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Repositório no GitHub
+    </a>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" role="tab" aria-selected="true" data-tab="sim">Simulador</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="tests">Testes de validação</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="about">Como funciona</button>
+  </nav>
+
+  <!-- ============================ SIMULADOR ============================ -->
+  <main id="tab-sim" class="tab-panel">
+    <div class="layout">
+      <!-- ---------- Coluna de configuração ---------- -->
+      <aside class="config-col">
+        <section class="card">
+          <div class="card-head">
+            <h2>Projetos</h2>
+            <span id="project-count" class="pill">4 / 15</span>
+          </div>
+          <p class="muted small">Gene na ordem da tabela (A, B, C…). Custo em reais com até 2 casas decimais (ex.: <code>4000</code> ou <code>4000,50</code>, sem separador de milhar).</p>
+          <div class="table-wrap">
+            <table class="projects-table">
+              <thead>
+                <tr><th>Gene</th><th>Nome</th><th>Custo (R$)</th><th>Benefício</th><th></th></tr>
+              </thead>
+              <tbody id="projects-body"></tbody>
+            </table>
+          </div>
+          <div class="row-buttons">
+            <button id="add-project" class="btn small">+ Adicionar projeto</button>
+            <button id="reset-example" class="btn small ghost">Restaurar exemplo</button>
+          </div>
+          <ul id="projects-errors" class="error-list"></ul>
+        </section>
+
+        <section class="card">
+          <h2>Parâmetros</h2>
+          <div class="fields">
+            <label class="field" for="f-budget">
+              <span>Orçamento disponível (R$)</span>
+              <input id="f-budget" type="text" inputmode="decimal" autocomplete="off" value="7000">
+              <small class="hint">Valor ≥ 0, até 2 casas decimais</small>
+              <small class="error" data-for="f-budget"></small>
+            </label>
+            <label class="field" for="f-pop">
+              <span>Tamanho da população</span>
+              <input id="f-pop" type="text" inputmode="numeric" autocomplete="off" value="20">
+              <small class="hint">Inteiro ≥ 2</small>
+              <small class="error" data-for="f-pop"></small>
+            </label>
+            <label class="field" for="f-gens">
+              <span>Número de gerações</span>
+              <input id="f-gens" type="text" inputmode="numeric" autocomplete="off" value="50">
+              <small class="hint">Inteiro ≥ 1 (a população inicial é a geração 0)</small>
+              <small class="error" data-for="f-gens"></small>
+            </label>
+            <label class="field" for="f-cross">
+              <span>Taxa de cruzamento (%)</span>
+              <input id="f-cross" type="text" inputmode="decimal" autocomplete="off" value="80">
+              <small class="hint">0 a 100, aplicada por par de pais</small>
+              <small class="error" data-for="f-cross"></small>
+            </label>
+            <label class="field" for="f-mut">
+              <span>Taxa de mutação (%)</span>
+              <input id="f-mut" type="text" inputmode="decimal" autocomplete="off" value="5">
+              <small class="hint">0 a 100, aplicada por gene dos filhos</small>
+              <small class="error" data-for="f-mut"></small>
+            </label>
+            <label class="field" for="f-tour">
+              <span>Tamanho do torneio</span>
+              <input id="f-tour" type="text" inputmode="numeric" autocomplete="off" value="2">
+              <small class="hint">Inteiro entre 2 e o tamanho da população</small>
+              <small class="error" data-for="f-tour"></small>
+            </label>
+            <label class="field" for="f-elite">
+              <span>Indivíduos de elite</span>
+              <input id="f-elite" type="text" inputmode="numeric" autocomplete="off" value="1">
+              <small class="hint">Inteiro entre 0 e população − 1</small>
+              <small class="error" data-for="f-elite"></small>
+            </label>
+            <label class="field" for="f-seed">
+              <span>Semente aleatória</span>
+              <input id="f-seed" type="text" inputmode="numeric" autocomplete="off" value="42">
+              <small class="hint">Inteiro de 0 a 4294967295</small>
+              <small class="error" data-for="f-seed"></small>
+            </label>
+          </div>
+        </section>
+
+        <section class="card controls-card">
+          <h2>Controles</h2>
+          <div class="controls">
+            <button id="btn-run" class="btn primary">▶ Executar</button>
+            <button id="btn-pause" class="btn">⏸ Pausar</button>
+            <button id="btn-step" class="btn">⏭ Avançar uma geração</button>
+            <button id="btn-reset" class="btn warn">↺ Reiniciar</button>
+          </div>
+          <div id="status" class="status" role="status" aria-live="polite"></div>
+          <label class="field inline" for="speed">
+            <span>Intervalo entre gerações: <b id="speed-label">300 ms</b></span>
+            <input id="speed" type="range" min="0" max="1500" step="50" value="300">
+          </label>
+          <label class="check"><input type="checkbox" id="anim-auto" checked> Animar as operações ao avançar uma geração</label>
+          <label class="check"><input type="checkbox" id="anim-sync"> Durante “Executar”, animar cada geração antes de seguir</label>
+        </section>
+      </aside>
+
+      <!-- ---------- Coluna de resultados ---------- -->
+      <div class="results-col">
+        <section class="metrics">
+          <div class="metric"><span class="metric-label">Geração atual</span><span id="m-gen" class="metric-value">0</span></div>
+          <div class="metric"><span class="metric-label">Melhor aptidão da geração</span><span id="m-best" class="metric-value">—</span></div>
+          <div class="metric"><span class="metric-label">Aptidão média da população</span><span id="m-avg" class="metric-value">—</span></div>
+          <div class="metric accent"><span class="metric-label">Melhor resultado acumulado</span><span id="m-acc" class="metric-value">—</span></div>
+        </section>
+
+        <section class="card" id="best-card">
+          <div class="card-head">
+            <h2 id="best-title">Melhor solução encontrada até agora</h2>
+            <span id="best-badge" class="pill"></span>
+          </div>
+          <div id="best-solution"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Animação das operações</h2>
+            <span id="anim-title" class="pill"></span>
+          </div>
+          <div class="anim-toolbar">
+            <button id="anim-play" class="btn small primary">▶ Animar geração</button>
+            <button id="anim-prev" class="btn small">◀ Par anterior</button>
+            <button id="anim-next" class="btn small">Próximo par ▶</button>
+            <button id="anim-stop" class="btn small ghost">■ Parar</button>
+            <label class="anim-speed">Velocidade
+              <input id="anim-speed" type="range" min="0.25" max="4" step="0.25" value="1">
+              <b id="anim-speed-label">1×</b>
+            </label>
+          </div>
+          <div id="anim-caption" class="caption" aria-live="polite"></div>
+          <div class="anim-grid">
+            <div class="anim-side">
+              <h3 id="anim-src-title">População de origem</h3>
+              <div id="anim-src" class="chip-list"></div>
+            </div>
+            <div id="anim-stage" class="stage"></div>
+            <div class="anim-side">
+              <h3 id="anim-dst-title">Nova geração</h3>
+              <div id="anim-dst" class="chip-list"></div>
+            </div>
+          </div>
+          <div class="legend">
+            <span><i class="sw p1"></i>gene do pai 1</span>
+            <span><i class="sw p2"></i>gene do pai 2</span>
+            <span><i class="sw mut"></i>bit invertido por mutação</span>
+            <span><i class="sw rem"></i>projeto removido na reparação</span>
+            <span><i class="sw elite"></i>elite</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Evolução da aptidão</h2>
+          <div id="chart" class="chart"></div>
+          <div class="legend">
+            <span><i class="ln best"></i>melhor da geração</span>
+            <span><i class="ln avg"></i>média da população</span>
+            <span><i class="ln acc"></i>melhor acumulado</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>População atual</h2>
+            <span id="pop-info" class="pill"></span>
+          </div>
+          <div id="population" class="population"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Log das etapas</h2>
+            <div class="log-tools">
+              <button id="log-prev" class="btn small icon" aria-label="Geração anterior">◀</button>
+              <label>Geração <input id="log-gen" type="number" min="0" step="1" value="0"></label>
+              <button id="log-next" class="btn small icon" aria-label="Próxima geração">▶</button>
+              <label class="check"><input type="checkbox" id="log-follow" checked> acompanhar a última</label>
+              <button id="log-animate" class="btn small">▶ Animar esta geração</button>
+              <button id="log-download" class="btn small ghost">Baixar log (.txt)</button>
+            </div>
+          </div>
+          <div id="log" class="log"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Histórico por geração</h2>
+            <button id="history-download" class="btn small ghost">Baixar CSV</button>
+          </div>
+          <div class="table-wrap history-wrap">
+            <table class="history">
+              <thead>
+                <tr>
+                  <th>Geração</th><th>Melhor aptidão</th><th>Cromossomo do melhor</th>
+                  <th>Aptidão média</th><th>Melhor acumulado</th><th>Cromossomo acumulado</th>
+                </tr>
+              </thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Avaliar um cromossomo</h2>
+          <p class="muted small">Usa os projetos e o orçamento da execução atual (aplicados no último “Reiniciar”). Útil para conferir os testes 6.2, 6.3 e 6.6.</p>
+          <div class="eval-row">
+            <input id="eval-input" type="text" inputmode="numeric" autocomplete="off" placeholder="ex.: 1111" aria-label="Cromossomo a avaliar">
+            <button id="eval-btn" class="btn small primary">Avaliar e reparar</button>
+          </div>
+          <div id="eval-output"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================== TESTES ============================== -->
+  <main id="tab-tests" class="tab-panel" hidden>
+    <section class="card">
+      <h2>Testes de validação (seção 6)</h2>
+      <p class="muted">Os testes usam os dados da seção 6.1 (orçamento R$ 7.000) e as mesmas funções do simulador. Os testes com operações controladas devem coincidir com os valores de referência.</p>
+      <button id="run-tests" class="btn primary">Executar todos os testes</button>
+      <div id="tests-summary" class="tests-summary"></div>
+      <div id="tests-output"></div>
+    </section>
+    <section class="card">
+      <h2>Efeito da taxa de mutação (seção 6.5)</h2>
+      <p class="muted">Mutação de 1% e de 20%, sementes 1 a 5, demais parâmetros da seção 6.5 (população 20, 50 gerações, cruzamento 80%, torneio 2, elite 1).</p>
+      <button id="run-experiment" class="btn primary">Executar experimento</button>
+      <div id="experiment-output"></div>
+    </section>
+  </main>
+
+  <!-- ============================== SOBRE ============================== -->
+  <main id="tab-about" class="tab-panel" hidden>
+    <section class="card prose">
+      <h2>Como o algoritmo funciona</h2>
+      <ol>
+        <li><b>Representação:</b> cada solução é um cromossomo binário; o gene <i>i</i> vale 1 se o projeto <i>i</i> for escolhido. Ex.: <code>1010</code> escolhe A e C.</li>
+        <li><b>População inicial (geração 0):</b> cada gene é sorteado de forma independente, com probabilidade 50% de ser 0 ou 1.</li>
+        <li><b>Reparação:</b> enquanto o custo passar do orçamento, remove-se o projeto selecionado com a menor razão benefício/custo (empate: menor índice). É aplicada à população inicial e a todos os filhos antes da avaliação.</li>
+        <li><b>Aptidão:</b> benefício total da solução reparada. A seleção vazia (<code>0000…</code>) é válida e tem aptidão 0.</li>
+        <li><b>Elitismo:</b> os <i>E</i> melhores da geração anterior (empate: menor índice) são copiados sem alteração para a próxima geração.</li>
+        <li><b>Seleção por torneio:</b> para cada pai, sorteiam-se <i>k</i> candidatos distintos da geração anterior; vence o de maior aptidão (empate: menor índice).</li>
+        <li><b>Cruzamento de um ponto:</b> com probabilidade igual à taxa de cruzamento (sorteada por par), sorteia-se o corte entre o 1º e o penúltimo gene e trocam-se os segmentos finais. Sem cruzamento, os filhos são cópias dos pais.</li>
+        <li><b>Mutação:</b> cada gene de cada filho é invertido com probabilidade igual à taxa de mutação.</li>
+        <li><b>Nova geração:</b> as vagas restantes são preenchidas pelos filhos. Se sobrar uma única vaga, fica apenas o primeiro filho do último par. O tamanho da população é constante e repetições são permitidas.</li>
+        <li><b>Encerramento:</b> após o número configurado de gerações, mostra-se a melhor solução encontrada em toda a execução (incluindo a geração 0).</li>
+      </ol>
+      <h3>Ordem dos sorteios (reprodutibilidade)</h3>
+      <p>Geração 0: genes do indivíduo 0 (A, B, C…), depois do indivíduo 1 e assim por diante. Em cada nova geração, para cada par: <i>k</i> sorteios do torneio 1, <i>k</i> sorteios do torneio 2, um sorteio para decidir o cruzamento (mais um para o corte, se houver), um sorteio por gene do filho 1 e um por gene do filho 2 (quando ele é mantido).</p>
+      <h3>Controles</h3>
+      <ul>
+        <li><b>Executar</b> roda as gerações até o limite; <b>Pausar</b> preserva o estado e <b>Executar</b> retoma de onde parou.</li>
+        <li><b>Avançar uma geração</b> produz exatamente uma nova geração e permanece pausado.</li>
+        <li><b>Reiniciar</b> limpa o histórico, aplica os dados/parâmetros dos campos e restabelece a semente configurada (gera de novo a geração 0).</li>
+        <li>Qualquer alteração nos dados ou parâmetros bloqueia Executar/Avançar até que se clique em <b>Reiniciar</b>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Algoritmo genético implementado do zero em HTML, CSS e JavaScript puro — sem bibliotecas externas.
+  </footer>
+
+  <script src="js/rng.js"></script>
+  <script src="js/ga.js"></script>
+  <script src="js/format.js"></script>
+  <script src="js/tests.js"></script>
+  <script src="js/anim.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
